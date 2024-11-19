@@ -1,0 +1,55 @@
+#include <stdio.h>
+
+void findwaitingtime(int n,int burst_time[],int arrival_time[],int waiting_time[]){
+    int completion_time[n];
+    int start_time=0;
+
+    for(int i =0;i<n;i++){
+        if(start_time<arrival_time[i]){
+            start_time=arrival_time[i];
+        }
+        start_time += burst_time[i];
+        completion_time[i]=start_time;
+    }
+
+    for(int i =0;i<n;i++){
+        waiting_time[i]=completion_time[i]-arrival_time[i]-burst_time[i];
+    }
+}
+
+void findturnaroundtime(int n,int burst_time[],int arrival_time[],int waiting_time[],int turnaround_time[]){
+    for(int i=0;i<n;i++){
+        turnaround_time[i]=waiting_time[i] + burst_time[i]; 
+    }
+}
+
+void displayresults(int n,int burst_time[],int arrival_time[],int waiting_time[],int turnaround_time[]){
+    printf("\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnAround Time\n");
+    for(int i =0;i<n;i++){
+        printf("\np%d\t\t%d\t\t%d\t\t%d\t\t%d\n",i + 1,arrival_time[i],burst_time[i],waiting_time[i],turnaround_time[i]);
+    }
+}
+
+int main(){
+    int n;
+    printf("Enter number of processes:");
+    scanf("%d",&n);
+
+    int burst_time[n], arrival_time[n], waiting_time[n],turnaround_time[n];
+
+    printf("Enter the Arrival time and the Burst time for each process:");
+    for(int i=0;i<n;i++){
+        printf("\nProcess p%d:\n",i+1);
+        printf("Arrival Time:");
+        scanf("%d",&arrival_time[i]);
+        printf("Burst Time:");
+        scanf("%d",&burst_time[i]);
+    }
+
+    findwaitingtime(n,burst_time,arrival_time,waiting_time);
+    findturnaroundtime( n, burst_time, arrival_time, waiting_time, turnaround_time);
+
+    displayresults(n, burst_time, arrival_time, waiting_time, turnaround_time);
+
+    return 0;
+}
