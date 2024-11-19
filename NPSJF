@@ -1,0 +1,64 @@
+# include <stdio.h>
+#include <stdbool.h>
+
+void nonpreemptiveSJF(int n,int arrival_time[],int burst_time[]){
+ int completion_time[n], waiting_time[n], turnaround_time[n];
+ int remaining_process=n,start_time=0;
+
+bool completed[n];
+for(int i=0;i<n;i++){
+completed[i]=false;}
+
+while(remaining_process > 0){
+    int shortest=-1 , min_burst=1e9;
+
+    for(int i=0;i<n;i++){
+        if(arrival_time[i]<=start_time && !completed[i] && burst_time[i] < min_burst){
+            min_burst=burst_time[i];
+            shortest=i;
+        }
+    }
+      
+       if(shortest==-1){
+        start_time++;
+        continue;
+       }
+
+    start_time += burst_time[shortest];
+    completion_time[shortest]= start_time;
+    waiting_time[shortest]= completion_time[shortest]-arrival_time[shortest]-burst_time[shortest];
+    if(waiting_time[shortest] <0){
+    waiting_time[shortest]=0;}
+
+    turnaround_time[shortest]= waiting_time[shortest]+burst_time[shortest];
+    completed[shortest]=true;
+    remaining_process --;
+}
+
+    printf("\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for(int i=0;i<n;i++){
+       printf("\np%d\t\t%d\t\t%d\t\t%d\t\t%d\n",i + 1, arrival_time[i],burst_time[i],waiting_time[i],turnaround_time[i]);
+    }
+}
+
+int main(){
+    int n;
+    printf("Enter number of processes:");
+    scanf("%d",&n);
+
+    int arrival_time[n], burst_time[n];
+
+    printf("Enter the Arrival Time and the Burst Time for each Process:");
+    for(int i=0;i<n;i++){
+        printf("\nProcess p%d:\n",i+1);
+        printf("Arrival Time:");
+        scanf("%d",&arrival_time[i]);
+        printf("Burst Time:");
+        scanf("%d",&burst_time[i]);
+    }
+
+    nonpreemptiveSJF(n,arrival_time,burst_time);
+
+    return 0;
+}
+
