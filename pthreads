@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define MATRIX_SIZE 3 // Define the size of the matrix (3x3 for simplicity)
+
+// Matrix data and result
+int matrixA[MATRIX_SIZE][MATRIX_SIZE];
+int matrixB[MATRIX_SIZE][MATRIX_SIZE];
+int result[MATRIX_SIZE][MATRIX_SIZE];
+
+// Structure to pass arguments to threads
+typedef struct {
+    int row;  // Row index in the result matrix
+} ThreadArgs;
+
+// Thread function to perform matrix multiplication for a specific row
+void* multiply_row(void* arg) {
+    ThreadArgs* args = (ThreadArgs*)arg;
+    int row = args->row;
+
+    for (int j = 0; j < MATRIX_SIZE; j++) {
+        result[row][j] = 0; // Initialize result cell
+        for (int k = 0; k < MATRIX_SIZE; k++) {
+            result[row][j] += matrixA[row][k] * matrixB[k][j];
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[MATRIX_SIZE];
+    ThreadArgs threadArgs[MATRIX_SIZE];
+
+    // Initialize matrices (example values)
+    printf("Matrix A:\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            matrixA[i][j] = i + j; // Example values
+            printf("%d ", matrixA[i][j]);
+        }
+        printf("\n");
+    }
+
+    printf("Matrix B:\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            matrixB[i][j] = i - j; // Example values
+            printf("%d ", matrixB[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Create threads to perform matrix multiplication
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        threadArgs[i].row = i;
+        if (pthread_create(&threads[i], NULL, multiply_row, (void*)&threadArgs[i]) != 0) {
+            perror("Failed to create thread");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Wait for all threads to complete
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        if (pthread_join(threads[i], NULL) != 0) {
+            perror("Failed to join thread");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Print the result matrix
+    printf("Result Matrix:\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            printf("%d ", result[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
