@@ -1,0 +1,144 @@
+# include <stdio.h>
+# include<stdbool.h>
+
+typedef struct{
+    int pid;
+    int arriving_time;
+    int burst_time;
+    int waiting_time;
+    int turnaround_time;
+    int completion_time;
+    int remaining_time;
+    int priority;
+}Process;
+
+void sort_process(int n,Process proc[],bool priority_based_sorting){
+    for(int i=0;i<n-1;i++){
+        for(int j=i+1;j<n;j++){
+            if(priority_based_sorting){
+                if(proc[i].priority>proc[j].priority){
+                    Process temp= proc[i];
+                    proc[i]=proc[j];
+                    proc[j]=temp;
+                }
+            }
+
+            else{
+                if(proc[i].arriving_time>proc[j].arriving_time){
+                    Process temp= proc[i];
+                    proc[i]=proc[j];
+                    proc[j]=temp;
+                }
+            }
+        }
+    }
+}
+
+void nonpreemptiveP(int n,Process proc[]){
+    int current_time=0;
+
+    for(int i=0;i<n;i++){
+        int highest_priority_index=-1;
+
+        for(int j=0;j<n;j++){
+            if(proc[j].arriving_time<=current_time && proc[j].completion_time==0){
+                if(highest_priority_index== -1 || proc[j].priority<proc[highest_priority_index].priority){
+                    highest_priority_index=j;
+                }
+            }
+        }
+        if(highest_priority_index !=-1){
+            current_time += proc[highest_priority_index].burst_time;
+            proc[highest_priority_index].completion_time=current_time;
+
+            proc[highest_priority_index].turnaround_time= proc[highest_priority_index].completion_time -proc[highest_priority_index].arriving_time;
+            proc[highest_priority_index].waiting_time =proc[highest_priority_index].turnaround_time-proc[highest_priority_index].burst_time;
+        }
+    }
+
+}
+
+void preemptiveP(int n, Process proc[]){
+    int completed=0, current_time=0;
+
+    while(completed !=n ){
+        int highest_priority_index =-1;
+
+        for(int i=0;i<n;i++){
+            if(proc[i].arriving_time <= current_time && proc[i].remaining_time >0){
+                if(highest_priority_index== -1 || proc[i].priority< proc[highest_priority_index].priority){
+                    highest_priority_index=i;
+                }
+            }
+        }
+
+        if(highest_priority_index != -1){
+            current_time++;
+            proc[highest_priority_index].remaining_time --;
+            
+        
+
+        if(proc[highest_priority_index].remaining_time==0){
+            
+            proc[highest_priority_index].completion_time= current_time;
+
+            proc[highest_priority_index].turnaround_time= proc[highest_priority_index].completion_time - proc[highest_priority_index].arriving_time;
+            proc[highest_priority_index].waiting_time = proc[highest_priority_index]. turnaround_time-proc[highest_priority_index].burst_time;
+            completed++;
+        }
+        }
+        else{
+            current_time ++;
+        }
+    }
+}
+
+void displayresults( int n, Process proc[]){
+    printf("\nProcess\tArriving Time\tBurst Time\tPriority\tWaiting Time\tTurnaround Time\n");
+    for(int i=0;i<n;i++){
+        printf("\n%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n",proc[i].pid,proc[i].arriving_time,proc[i].burst_time,proc[i].priority,proc[i].waiting_time,proc[i].turnaround_time);
+
+    }
+
+}
+
+int main(){
+    int n , choice;
+
+    printf("Enter number of Processes:");
+    scanf("%d",&n);
+
+    Process proc[n];
+
+    for(int i=0;i<n;i++){
+        proc[i].pid= i+1;
+        printf("\nEnter Arrival Time Burst Time and Priority for each Process:");
+        printf("\nArrival Time:");
+        scanf("%d",&proc[i].arriving_time);
+        printf("\nBurst Time");
+        scanf("%d",&proc[i].burst_time);
+        printf("\nPriority:");
+        scanf("%d",&proc[i].priority);
+
+        proc[i].remaining_time=proc[i].burst_time;
+        proc[i].waiting_time=proc[i].turnaround_time=proc[i].completion_time=0;
+
+    }
+
+    printf("Choose the method of scheduling \n1.NonPreemptive Priority. \n2.Preemptive Priority.");
+    printf("Enter choice");
+    scanf("%d",&choice);
+
+    if(choice==1){
+        nonpreemptiveP(n,proc);
+    }
+    else if(choice==2){
+        preemptiveP(n,proc);
+    }
+    else{
+        printf("Invalid Choice.");
+        return 1;
+    }
+    displayresults(n,proc);
+    return 0;
+}
