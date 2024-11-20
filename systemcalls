@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>   // For open()
+#include <unistd.h>  // For read(), write(), and exit()
+
+int main() {
+    char buffer[100];
+    ssize_t bytesRead;
+
+    // 1. open() - Open a file
+    int fileDescriptor = open("Round robin.txt", O_RDONLY);
+    if (fileDescriptor < 0) {
+        perror("Error opening the file");
+        exit(EXIT_FAILURE);  // 4. exit() - Exit the program on error
+    }
+    printf("File opened successfully.\n");
+
+    // 2. read() - Read from the file
+    bytesRead = read(fileDescriptor, buffer, sizeof(buffer) - 1);
+    if (bytesRead < 0) {
+        perror("Error reading the file");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+    buffer[bytesRead] = '\0'; // Null-terminate the string
+    printf("Data read from file:\n%s\n", buffer);
+
+    // 3. write() - Write to standard output
+    ssize_t bytesWritten = write(STDOUT_FILENO, "Writing to stdout using write() system call\n", 45);
+    if (bytesWritten < 0) {
+        perror("Error writing to stdout");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+
+    // Close the file
+    close(fileDescriptor);
+
+    // 4. exit() - Exit the program successfully
+    printf("Exiting program.\n");
+    exit(EXIT_SUCCESS);
+}
+
+
+
