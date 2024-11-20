@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+void fifo_page_replacement(int reference_string[], int n, int capacity) {
+    int frames[capacity];
+    int front = 0, page_faults = 0;
+    bool is_page_present;
+
+    // Initialize frames to -1 (empty)
+    for (int i = 0; i < capacity; i++) {
+        frames[i] = -1;
+    }
+
+    printf("\nPage Replacement Process:\n");
+    printf("Reference String\tFrames\t\tPage Fault\n");
+
+    for (int i = 0; i < n; i++) {
+        is_page_present = false;
+
+        // Check if the page is already in the frame
+        for (int j = 0; j < capacity; j++) {
+            if (frames[j] == reference_string[i]) {
+                is_page_present = true;
+                break;
+            }
+        }
+
+        if (!is_page_present) {
+            // Page fault occurs
+            frames[front] = reference_string[i];
+            front = (front + 1) % capacity; // Move the pointer in circular FIFO manner
+            page_faults++;
+        }
+
+        // Print current frame state
+        printf("%d\t\t\t", reference_string[i]);
+        for (int k = 0; k < capacity; k++) {
+            if (frames[k] != -1) {
+                printf("%d ", frames[k]);
+            } else {
+                printf("- ");
+            }
+        }
+        printf("\t\t%s\n", is_page_present ? "No" : "Yes");
+    }
+
+    printf("\nTotal Page Faults: %d\n", page_faults);
+}
+
+int main() {
+    int n, capacity;
+
+    printf("Enter the number of pages in the reference string: ");
+    scanf("%d", &n);
+
+    int reference_string[n];
+    printf("Enter the reference string (space-separated): ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &reference_string[i]);
+    }
+
+    printf("Enter the capacity of the frames: ");
+    scanf("%d", &capacity);
+
+    fifo_page_replacement(reference_string, n, capacity);
+
+    return 0;
+}
