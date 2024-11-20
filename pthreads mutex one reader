@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+// Shared data
+int data = 0;
+
+// Mutex for synchronization
+pthread_mutex_t mutex;
+
+// Reader function
+void* reader(void* arg) {
+    while (1) {
+        pthread_mutex_lock(&mutex);  // Acquire the mutex lock
+        printf("Reader reads data: %d\n", data);
+        pthread_mutex_unlock(&mutex);  // Release the lock
+        sleep(2);  // Simulate some delay before reading again
+    }
+    return NULL;
+}
+
+// Writer function
+void* writer(void* arg) {
+    while (1) {
+        pthread_mutex_lock(&mutex);  // Acquire the mutex lock
+        data++;  // Modify the shared data
+        printf("Writer writes data: %d\n", data);
+        pthread_mutex_unlock(&mutex);  // Release the lock
+        sleep(3);  // Simulate some delay before writing again
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t reader_thread, writer_thread;
+
+    // Initialize the mutex
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create the reader and writer threads
+    pthread_create(&reader_thread, NULL, reader, NULL);
+    pthread_create(&writer_thread, NULL, writer, NULL);
+
+    // Wait for the threads to finish (though in this case they won't)
+    pthread_join(reader_thread, NULL);
+    pthread_join(writer_thread, NULL);
+
+    // Destroy the mutex
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
+
